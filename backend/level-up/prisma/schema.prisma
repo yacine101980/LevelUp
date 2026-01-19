@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -15,12 +14,88 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  username String   @unique
-  password String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  level     Int      @default(1)
+  xp_points Int      @default(0)
+  goals     Goal[]
+  habits    Habit[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
+model Goal {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String?
+  category     String?
+  priority     Priority @default(medium)
+  status       GoalStatus @default(active)
+  start_date   DateTime?
+  deadline     DateTime?
+  completed_at DateTime?
+  user         User     @relation(fields: [user_id], references: [id])
+  user_id      Int
+  steps        Step[]
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
 
+model Step {
+  id           Int      @id @default(autoincrement())
+  title        String
+  deadline     DateTime?
+  is_completed Boolean  @default(false)
+  order        Int?
+  goal         Goal     @relation(fields: [goal_id], references: [id])
+  goal_id      Int
+  created_at   DateTime @default(now())
+  completed_at DateTime?
+}
 
+model Habit {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  category      String?
+  frequency     Frequency
+  weekly_target Int?
+  start_date    DateTime?
+  is_archived   Boolean  @default(false)
+  user          User     @relation(fields: [user_id], references: [id])
+  user_id       Int
+  habitLogs     HabitLog[]
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model HabitLog {
+  id           Int      @id @default(autoincrement())
+  habit        Habit    @relation(fields: [habit_id], references: [id])
+  habit_id     Int
+  date         DateTime
+  is_completed Boolean  @default(true)
+  notes        String?
+  created_at   DateTime @default(now())
+
+  @@unique([habit_id, date])
+}
+
+enum Priority {
+  low
+  medium
+  high
+}
+
+enum GoalStatus {
+  active
+  completed
+  abandoned
+}
+
+enum Frequency {
+  daily
+  weekly
+}

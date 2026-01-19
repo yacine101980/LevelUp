@@ -11,5 +11,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0",
+    "pg": "^8.17.1",
+    "prisma": "^6.19.2"
   }
 }

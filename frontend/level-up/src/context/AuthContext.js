@@ -1,13 +1,11 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
-// Création du contexte
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Vérifier si un token existe déjà au chargement de la page
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -16,27 +14,41 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Fonction de connexion (sera appelée par le formulaire de Login)
   const login = (userData, token) => {
-    // On stocke le token et les infos (ex: localStorage)
+    // On ajoute une date de création fictive si elle n'existe pas
+    const userWithDate = { ...userData, createdAt: userData.createdAt || new Date().toISOString() };
+    
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userWithDate));
+    setUser(userWithDate);
   };
 
-  // Fonction de déconnexion [cite: 300]
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
   };
 
+  // --- NOUVELLE FONCTION ---
+  const updateProfile = async (name, email) => {
+    try {
+      // Simulation d'un appel API (ici on met juste à jour le state local)
+      const updatedUser = { ...user, name, email };
+      
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: "Impossible de mettre à jour le profil" };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfile, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-// Hook personnalisé pour utiliser le contexte plus facilement
 export const useAuth = () => useContext(AuthContext);

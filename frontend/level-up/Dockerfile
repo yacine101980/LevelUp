@@ -2,11 +2,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY frontend/level-up/package*.json .
+COPY package*.json .
 
 RUN npm ci
 
-COPY frontend/level-up . 
+COPY . . 
 
 RUN npm run build
 

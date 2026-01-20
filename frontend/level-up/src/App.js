@@ -82,7 +82,7 @@ function Layout({ children }) {
                 </button>
                 
                 <button
-                  onClick={() => { logout(); navigate('/login'); }}
+                  onClick={async () => { await logout(); navigate('/login'); } }
                   className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
                   title="Se déconnecter"
                 >

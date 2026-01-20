@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Zap, Mail, Lock, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+
+
 
 export default function Register() {
+  const { register, login } = useAuth();
   const navigate = useNavigate();
   
   // États du formulaire
@@ -31,25 +35,10 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      // 2. Appel API (Backend)
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Cet email est déjà utilisé ou une erreur est survenue.');
-      }
-
-      // 3. Succès : Redirection vers le login
-      // Optionnel : Afficher un toast/notification de succès ici
-      alert("Compte créé avec succès ! Connectez-vous.");
-      navigate('/login');
+      await register(name, email, password);
+      // Redirection vers la page de connexion
+      await login(email, password);
+      navigate('/dashboard');
 
     } catch (err) {
       setError(err.message);

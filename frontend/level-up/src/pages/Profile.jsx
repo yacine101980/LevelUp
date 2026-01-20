@@ -30,18 +30,16 @@ export default function Profile() {
 
     setIsLoading(true);
     
-    // Appel à la fonction du contexte
-    const result = await updateProfile(name, email);
-    
-    if (result.success) {
+   try {
+      await updateProfile(name, email);
       setSuccess(true);
       // Efface le message de succès après 3 secondes
       setTimeout(() => setSuccess(false), 3000);
-    } else {
-      setError(result.error || 'Une erreur est survenue');
+    } catch (err) {
+      setError(err.message || 'Une erreur est survenue');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleCancel = () => {
@@ -52,8 +50,8 @@ export default function Profile() {
   };
 
   // Formatage de la date
-  const memberSince = user?.createdAt 
-    ? new Date(user.createdAt).toLocaleDateString('fr-FR', { 
+  const memberSince = user?.created_at 
+    ? new Date(user.created_at).toLocaleDateString('fr-FR', { 
         day: 'numeric', 
         month: 'long', 
         year: 'numeric' 
@@ -172,10 +170,10 @@ export default function Profile() {
       <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations du compte</h3>
         <div className="space-y-3 text-sm">
-          <div className="flex justify-between py-2 border-b border-gray-100">
+          {/* <div className="flex justify-between py-2 border-b border-gray-100">
             <span className="text-gray-600">ID utilisateur</span>
             <span className="text-gray-900 font-mono">{user?.id || 'N/A'}</span>
-          </div>
+          </div> */}
           <div className="flex justify-between py-2 border-b border-gray-100">
             <span className="text-gray-600">Date de création</span>
             <span className="text-gray-900">{memberSince}</span>

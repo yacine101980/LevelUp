@@ -41,7 +41,7 @@ exports.updateGoal = (userId, id, data) => {
 exports.completeGoal = (id) => {
   return prisma.goal.update({
     where: { id: parseInt(id, 10) },
-    data: { status: 'COMPLETED' },
+    data: { status: 'completed' },
   })
 }
 

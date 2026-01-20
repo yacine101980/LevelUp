@@ -17,7 +17,7 @@ const categoryLabels = {
   learning: 'Apprentissage',
 };
 
-export default function GoalCard({ goal, onEdit, onDelete, onToggleStep }) {
+export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComplete }) {
   // Sécurités au cas où goal.steps soit undefined
   const steps = goal.steps || [];
   const completedSteps = steps.filter(s => s.completed).length;
@@ -30,7 +30,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep }) {
 
   return (
     <div className={`bg-white rounded-xl p-6 border-2 shadow-sm transition-all hover:shadow-md ${
-      goal.completedAt ? 'border-green-200 bg-green-50/30' : 'border-gray-200'
+      goal.status === 'completed'? 'border-green-200 bg-green-50/30' : 'border-gray-200'
     }`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -42,7 +42,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep }) {
             </span>
             
             {/* Badge Terminé */}
-            {goal.completedAt && (
+            {goal.status==='completed' && (
               <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                 <Trophy className="w-3 h-3" />
                 Terminé
@@ -55,6 +55,15 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep }) {
 
         {/* Boutons d'action */}
         <div className="flex items-center gap-2 ml-4">
+          {goal.status!=='completed' && (
+          <button
+            onClick={() => onComplete(goal.id)}
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            Terminer
+          </button>
+        )}
           <button
             onClick={() => onEdit(goal)}
             className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"

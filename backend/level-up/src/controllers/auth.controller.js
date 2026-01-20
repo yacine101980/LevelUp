@@ -1,62 +1,45 @@
-const bcrypt = require('bcrypt')
-const { prisma } = require('../prisma')
-const { generateToken } = require('../utils/jwt')
+const authService = require('../services/auth.service')
 
-const register = async (req, res) => {
-  const { username, password } = req.body
-
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Missing fields' })
+exports.register = async (req, res) => {
+  try {
+    const user = await authService.register(req.body)
+    res.status(201).json(user)
+  } catch (e) {
+    if (e.message === 'USER_EXISTS')
+      return res.status(409).json({ message: 'User exists' })
+    res.status(500).json({ message: 'Server error' })
   }
-
-  const existingUser = await prisma.user.findUnique({
-    where: { username },
-  })
-
-  if (existingUser) {
-    return res.status(409).json({ message: 'User already exists' })
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10)
-
-  const user = await prisma.user.create({
-    data: {
-      username,
-      password: hashedPassword,
-    },
-  })
-
-  return res.status(201).json({
-    id: user.id,
-    username: user.username,
-  })
 }
 
-const login = async (req, res) => {
-  const { username, password } = req.body
-
-  const user = await prisma.user.findUnique({
-    where: { username },
-  })
-
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' })
+exports.login = async (req, res) => {
+  try {
+    res.json(await authService.login(req.body))
+  } catch {
+    res.status(401).json({ message: 'Invalid credentials' })
   }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password)
-
-  if (!isPasswordValid) {
-    return res.status(401).json({ message: 'Invalid credentials' })
-  }
-
-  const token = generateToken(user.id)
-
-  return res.json({
-    token,
-  })
 }
 
-module.exports = {
-  register,
-  login,
+exports.me = async (req, res) => {
+  res.json(await authService.getProfile(req.user.id))
+}
+
+exports.logout = async (req, res) => {
+  try {
+    const result = await authService.logout(req.user.id)
+    res.json(result)
+  } catch (e) {
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const updatedUser = await authService.updateProfile(
+      req.user.id,
+      req.body
+    )
+    res.json(updatedUser)
+  } catch (e) {
+    res.status(500).json({ message: 'Server error' })
+  }
 }

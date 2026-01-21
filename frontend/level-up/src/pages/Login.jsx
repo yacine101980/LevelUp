@@ -18,43 +18,8 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-        // --- DÉBUT MODIFICATION : Simulation pour le développement ---
-        
-        // On simule un délai réseau de 1 seconde pour faire réaliste
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Au lieu d'appeler le vrai backend (qui n'existe pas encore),
-        // on crée un "faux" utilisateur réussi.
-        const mockUser = {
-        id: 1,
-        name: "Utilisateur Test",
-        email: email, // On garde l'email que tu as tapé
-        token: "fake-jwt-token"
-        };
-
-        // On dit à l'app "C'est bon, il est connecté !"
-        login(mockUser, mockUser.token);
-        navigate('/dashboard');
-
-        // --- FIN MODIFICATION ---
-        
-        // Si ta fonction login du contexte gère l'appel API, adapte cette partie
-        /*const response = await fetch('http://localhost:3000/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Email ou mot de passe incorrect');
-        }
-
-        // Connexion réussie via le contexte
-        login(data.user, data.token);
-        navigate('/dashboard'); // Redirection vers le dashboard*/
-
+      await login(email, password);
+      navigate('/dashboard');
     } catch (err) {
         setError(err.message);
     } finally {

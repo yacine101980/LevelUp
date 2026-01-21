@@ -30,3 +30,12 @@ exports.remove = async (req, res) => {
   await goalService.deleteGoal(req.params.id)
   res.status(204).send()
 }
+
+exports.abandon = async (req, res) => {
+  try {
+    const goal = await goalService.abandonGoal(req.params.id);
+    res.json(goal);
+  } catch (e) {
+    res.status(400).json({ message: e.message || 'Erreur lors de l’abandon de l’objectif' });
+  }
+};

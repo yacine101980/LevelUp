@@ -17,7 +17,7 @@ const categoryLabels = {
   learning: 'Apprentissage',
 };
 
-export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComplete }) {
+export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComplete, onAbandon }) {
   // Sécurités au cas où goal.steps soit undefined
   const steps = goal.steps || [];
   const completedSteps = steps.filter(s => s.completed).length;
@@ -30,7 +30,8 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
 
   return (
     <div className={`bg-white rounded-xl p-6 border-2 shadow-sm transition-all hover:shadow-md ${
-      goal.status === 'completed'? 'border-green-200 bg-green-50/30' : 'border-gray-200'
+      goal.status === 'completed'? 'border-green-200 bg-green-50/30' :goal.status === 'abandoned' ?'border-red-200 bg-red-50/30' : 'border-gray-200'
+       
     }`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -40,7 +41,9 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${categoryColors[goal.category] || 'bg-gray-100 text-gray-700'}`}>
               {categoryLabels[goal.category] || goal.category}
             </span>
-            
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+              {goal.priority === 'high' ? 'Haute' : goal.priority === 'low' ? 'Basse' : 'Moyenne'}
+            </span>
             {/* Badge Terminé */}
             {goal.status==='completed' && (
               <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -55,7 +58,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
 
         {/* Boutons d'action */}
         <div className="flex items-center gap-2 ml-4">
-          {goal.status!=='completed' && (
+          {goal.status!=='completed' && goal.status!=='abandoned' && (
           <button
             onClick={() => onComplete(goal.id)}
             className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
@@ -64,12 +67,14 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
             Terminer
           </button>
         )}
+         {goal.status !== 'abandoned' && (
           <button
             onClick={() => onEdit(goal)}
             className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
           >
             <Edit2 className="w-4 h-4" />
           </button>
+        )}
           <button
             onClick={() => onDelete(goal.id)}
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -113,28 +118,15 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
         </div>
       )}
 
-      {/* Steps List */}
-      {/* {totalSteps > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Étapes</h4>
-          {steps.map(step => (
-            <div
-              key={step.id}
-              className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
-              onClick={() => onToggleStep(goal.id, step.id)}
-            >
-              {step.completed ? (
-                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-              ) : (
-                <Circle className="w-5 h-5 text-gray-400 flex-shrink-0" />
-              )}
-              <span className={`text-sm ${step.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
-                {step.title}
-              </span>
-            </div>
-          ))}
-        </div>
-      )} */}
+     
+    {goal.status!=='abandoned' && (
+              <button
+                onClick={() => onAbandon(goal.id)}
+                className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Abandonner
+              </button>
+            )}
     </div>
   );
 }

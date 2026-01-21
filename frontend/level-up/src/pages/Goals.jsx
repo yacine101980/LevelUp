@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Plus, Filter } from 'lucide-react';
 import GoalCard from '../components/GoalCard';
 import GoalForm from '../components/GoalForm';
-import { getGoalsAPI, createGoalAPI, updateGoalAPI, deleteGoalAPI, completeGoalAPI } from '../services/goalsService';
+import { getGoalsAPI, createGoalAPI, updateGoalAPI, deleteGoalAPI, completeGoalAPI, abandonGoalAPI } from '../services/goalsService';
 
 export default function Goals() {
   const { user } = useAuth();
@@ -31,8 +31,9 @@ export default function Goals() {
   };
 
   const filteredGoals = goals.filter(goal => {
-    if (filter === 'active') return goal.status !== 'completed';
+    if (filter === 'active') return goal.status === 'active' ;
     if (filter === 'completed') return goal.status === 'completed';
+    if (filter === 'abandoned') return goal.status === 'abandoned';
     return true;
   });
 
@@ -93,6 +94,17 @@ export default function Goals() {
     }
   };
 
+  const handleAbandonGoal = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await abandonGoalAPI(token, id);
+      await fetchGoals();
+    } catch (error) {
+      console.error('Erreur lors de l\'abandon:', error);
+      alert('Erreur lors de l\'abandon de l\'objectif: ' + error.message);
+    }
+  };
+
   const handleCompleteGoal = async (id) => {
     try {
       const token = localStorage.getItem('token');
@@ -139,7 +151,7 @@ export default function Goals() {
       <div className="flex items-center gap-4">
         <Filter className="w-5 h-5 text-gray-400" />
         <div className="flex gap-2">
-          {['all', 'active', 'completed'].map(status => (
+          {['all', 'active', 'completed', 'abandoned'].map(status => (
             <button
               key={status}
               onClick={() => setFilter(status)}
@@ -149,7 +161,7 @@ export default function Goals() {
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {status === 'all' ? 'Tous' : status === 'active' ? 'Actifs' : 'Terminés'}
+              {status === 'all' ? 'Tous' : status === 'active' ? 'Actifs' : status === 'abandoned' ? 'Abandonnés' : 'Terminés'}
             </button>
           ))}
         </div>
@@ -161,7 +173,7 @@ export default function Goals() {
           <p className="text-gray-500">
             {filter === 'all' 
               ? 'Aucun objectif. Créez votre premier objectif !' 
-              : `Aucun objectif ${filter === 'active' ? 'actif' : 'terminé'}.`
+              : `Aucun objectif ${filter === 'active' ? 'actif' : filter === 'abandoned' ? 'Abandonnés' : 'terminé'}.`
             }
           </p>
         </div>
@@ -175,6 +187,7 @@ export default function Goals() {
               onDelete={handleDeleteGoal}
               onComplete={handleCompleteGoal}
               onStepUpdate={fetchGoals} // Rafraîchir après update d'une étape
+              onAbandon={handleAbandonGoal}
             />
           ))}
         </div>

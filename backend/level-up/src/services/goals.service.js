@@ -75,3 +75,10 @@ exports.deleteGoal = async (id) => {
     throw error;
   }
 };
+
+exports.abandonGoal = (id) => {
+  return prisma.goal.update({
+    where: { id: parseInt(id, 10) },
+    data: { status: 'abandoned' },
+  });
+};

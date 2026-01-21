@@ -10,25 +10,25 @@ export default function HabitCard({ habit, onEdit, onDelete, onToggle }) {
     date.setDate(date.getDate() - (6 - i));
     return date;
   });
-
-  const completedDays = habit.logs.filter(log => log.completed).length;
+  const logs = habit.logs || [];
+  const completedDays = logs.filter((log) => log.completed).length;
+  const title = habit.title || habit.name || 'Habitude';
 
   return (
     <div
       className="bg-white rounded-xl p-6 border-2 shadow-sm transition-all hover:shadow-md"
-      style={{ borderColor: `${habit.color}40` }}
+      style={{ borderColor: `${(habit.color || '#3b82f6')}40` }}
     >
-      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3 flex-1">
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-            style={{ backgroundColor: `${habit.color}30` }}
+            style={{ backgroundColor: `${(habit.color || '#3b82f6')}30` }}
           >
-            {habit.icon}
+            {habit.icon || '💪'}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900">{habit.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <p className="text-sm text-gray-600">{habit.description}</p>
           </div>
         </div>
@@ -48,14 +48,13 @@ export default function HabitCard({ habit, onEdit, onDelete, onToggle }) {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-gray-50 rounded-lg p-3 text-center">
           <div className="flex items-center justify-center gap-1 mb-1">
             <Flame className="w-4 h-4 text-orange-600" />
             <span className="text-xs font-medium text-gray-600">Série</span>
           </div>
-          <div className="text-xl font-bold text-gray-900">{habit.streak}</div>
+          <div className="text-xl font-bold text-gray-900">{habit.streak || 0}</div>
         </div>
         <div className="bg-gray-50 rounded-lg p-3 text-center">
           <div className="flex items-center justify-center gap-1 mb-1">
@@ -70,24 +69,23 @@ export default function HabitCard({ habit, onEdit, onDelete, onToggle }) {
             <span className="text-xs font-medium text-gray-600">Fréquence</span>
           </div>
           <div className="text-xs font-bold text-gray-900 uppercase">
-            {habit.frequency === 'daily' ? 'Quotidien' : 'Hebdo'}
+            {habit.frequency === 'weekly' ? 'Hebdo' : 'Quotidien'}
           </div>
         </div>
       </div>
 
-      {/* 7-Day Tracker */}
       <div>
         <h4 className="text-sm font-medium text-gray-700 mb-3">7 derniers jours</h4>
         <div className="grid grid-cols-7 gap-2">
-          {last7Days.map(date => {
+          {last7Days.map((date) => {
             const dateStr = date.toISOString().split('T')[0];
-            const log = habit.logs.find(l => l.date === dateStr);
+            const log = logs.find((l) => l.date === dateStr);
             const isToday = dateStr === today.toISOString().split('T')[0];
 
             return (
               <button
                 key={dateStr}
-                onClick={() => onToggle(habit.id, dateStr)}
+                // onClick={() => onToggle(habit.id, dateStr)}
                 className={`aspect-square rounded-lg flex flex-col items-center justify-center p-2 transition-all ${
                   log?.completed
                     ? 'shadow-sm'

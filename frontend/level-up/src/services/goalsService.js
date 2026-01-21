@@ -203,3 +203,21 @@ export const deleteStepAPI = async (token, stepId) => {
   }
   return await response.json();
 };
+
+export const abandonGoalAPI = async (token, id) => {
+  const response = await fetch(`${API_BASE}/goals/${id}/abandon`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    let errorMessage = 'Erreur lors de l’abandon de l\'objectif';
+    try {
+      const error = await response.json();
+      errorMessage = error.message || errorMessage;
+    } catch {
+      errorMessage = response.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
+  }
+  return await response.json();
+};

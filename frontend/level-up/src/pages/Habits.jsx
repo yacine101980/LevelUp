@@ -1,22 +1,64 @@
-import React, { useState } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Plus } from 'lucide-react';
 import HabitCard from '../components/HabitCard';
 import HabitForm from '../components/HabitForm';
-
+import {
+  getHabitsAPI,
+  createHabitAPI,
+  updateHabitAPI,
+  archiveHabitAPI,
+} from '../services/habitsService';
 export default function Habits() {
-  const [habits, setHabits] = useLocalStorage('habits', []);
+  const { user } = useAuth();
+  const [habits, setHabits] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
 
-  const handleSaveHabit = (habit) => {
-    if (editingHabit) {
-      setHabits(habits.map(h => (h.id === habit.id ? habit : h)));
-    } else {
-      setHabits([...habits, habit]);
+  useEffect(() => {
+    if (user) fetchHabits();
+    else setLoading(false);
+  }, [user]);
+
+  const fetchHabits = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const data = await getHabitsAPI(token);
+      setHabits(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des habitudes:', error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
-    setShowForm(false);
-    setEditingHabit(null);
+  };
+
+  const handleSaveHabit = async (habitInput) => {
+    try {
+      const token = localStorage.getItem('token');
+      const payload = {
+        name: habitInput.title,
+        description: habitInput.description,
+        frequency: habitInput.frequency,
+        category: habitInput.category || null,
+        weekly_target:
+          habitInput.frequency === 'weekly' ? habitInput.weekly_target || 1 : null,
+      };
+
+      if (editingHabit) {
+        await updateHabitAPI(token, editingHabit.id, payload);
+      } else {
+        await createHabitAPI(token, payload);
+      }
+
+      await fetchHabits();
+      setShowForm(false);
+      setEditingHabit(null);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert(error.message);
+    }
   };
 
   const handleEditHabit = (habit) => {
@@ -24,69 +66,20 @@ export default function Habits() {
     setShowForm(true);
   };
 
-  const handleDeleteHabit = (id) => {
-    if (window.confirm("Voulez-vous vraiment supprimer cette habitude ?")) {
-      setHabits(habits.filter(h => h.id !== id));
+  const handleDeleteHabit = async (id) => {
+    if (!window.confirm('Voulez-vous vraiment archiver cette habitude ?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await archiveHabitAPI(token, id);
+      await fetchHabits();
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert(error.message);
     }
-  };
-
-  const handleToggleHabit = (habitId, date) => {
-    setHabits(
-      habits.map(habit => {
-        if (habit.id === habitId) {
-          const existingLog = habit.logs.find(log => log.date === date);
-          let updatedLogs;
-          
-          if (existingLog) {
-            updatedLogs = habit.logs.map(log =>
-              log.date === date ? { ...log, completed: !log.completed } : log
-            );
-          } else {
-            updatedLogs = [...habit.logs, { date, completed: true }];
-          }
-
-          // Calculate streak
-          const today = new Date();
-          let streak = 0;
-          let currentDate = new Date(today);
-
-          while (true) {
-            const dateStr = currentDate.toISOString().split('T')[0];
-            const log = updatedLogs.find(l => l.date === dateStr);
-            
-            if (log && log.completed) {
-              streak++;
-              currentDate.setDate(currentDate.getDate() - 1);
-            } else {
-              // Si on ne trouve pas de log pour aujourd'hui, on ne casse pas la série
-              // seulement si on vérifie le passé. Mais pour simplifier ici :
-              if (dateStr !== today.toISOString().split('T')[0]) {
-                 break; 
-              }
-              // Petite correction logique pour ne pas casser la streak si on n'a pas encore coché aujourd'hui
-              currentDate.setDate(currentDate.getDate() - 1);
-            }
-          }
-
-          // Recalcul simplifié de la streak pour l'affichage immédiat
-          // (Compte les jours consécutifs cochés en partant d'aujourd'hui ou hier)
-          // Note: Le code original avait une logique de streak un peu complexe,
-          // on garde celle fournie par défaut qui semble correcte.
-
-          return {
-            ...habit,
-            logs: updatedLogs,
-            streak, // Idéalement, recalcule la streak ici
-          };
-        }
-        return habit;
-      })
-    );
   };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Mes Habitudes</h2>
@@ -104,7 +97,6 @@ export default function Habits() {
         </button>
       </div>
 
-      {/* Habits List */}
       {habits.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -123,19 +115,18 @@ export default function Habits() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {habits.map(habit => (
+          {habits.map((habit) => (
             <HabitCard
               key={habit.id}
               habit={habit}
               onEdit={handleEditHabit}
               onDelete={handleDeleteHabit}
-              onToggle={handleToggleHabit}
+              //  onToggle={handleToggleHabit}
             />
           ))}
         </div>
       )}
 
-      {/* Habit Form Modal */}
       {showForm && (
         <HabitForm
           habit={editingHabit}

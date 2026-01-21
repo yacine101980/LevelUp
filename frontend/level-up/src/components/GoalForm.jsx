@@ -7,7 +7,7 @@ export default function GoalForm({ goal, onSave, onCancel }) {
   const [description, setDescription] = useState(goal?.description || '');
   const [category, setCategory] = useState(goal?.category || 'personal');
   const [editingStepId, setEditingStepId] = useState(null);
-
+  const [priority, setPriority] = useState(goal?.priority || 'medium');
   // Date par défaut : Aujourd'hui + 30 jours
   const [deadline, setDeadline] = useState('');
   
@@ -20,6 +20,7 @@ export default function GoalForm({ goal, onSave, onCancel }) {
       setTitle(goal.title || '');
       setDescription(goal.description || '');
       setCategory(goal.category || 'personal');
+      setPriority(goal.priority || 'medium');
       setDeadline(goal.deadline ? new Date(goal.deadline).toISOString().split('T')[0] : '');
       setSteps((goal.steps || []).map(step => ({
         ...step,
@@ -88,6 +89,7 @@ export default function GoalForm({ goal, onSave, onCancel }) {
       category,
       deadline,
       steps,
+      priority,
       createdAt: goal?.createdAt || new Date().toISOString(),
       completedAt: goal?.completedAt || null,
     };
@@ -166,7 +168,20 @@ export default function GoalForm({ goal, onSave, onCancel }) {
                 <option value="learning">Apprentissage</option>
               </select>
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Priorité *
+              </label>
+              <select
+                value={priority}
+                onChange={e => setPriority(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              >
+                <option value="low">Basse</option>
+                <option value="medium">Moyenne</option>
+                <option value="high">Haute</option>
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Date limite *

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Circle, Calendar, Edit2, Trash2, Trophy } from 'lucide-react';
+import { CheckCircle2, Calendar, Edit2, Trash2, Trophy } from 'lucide-react';
 
 // Pas besoin d'importer les types en JS
 
@@ -114,7 +114,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
       )}
 
       {/* Steps List */}
-      {totalSteps > 0 && (
+      {/* {totalSteps > 0 && (
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700 mb-3">Étapes</h4>
           {steps.map(step => (
@@ -134,7 +134,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

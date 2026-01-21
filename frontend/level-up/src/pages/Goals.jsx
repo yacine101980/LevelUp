@@ -39,31 +39,43 @@ export default function Goals() {
   const handleSaveGoal = async (goal) => {
     try {
       const token = localStorage.getItem('token');
+      
+      // Préparer les données à envoyer
       const data = {
         title: goal.title,
         description: goal.description,
         category: goal.category,
         priority: goal.priority || 'medium',
         deadline: goal.deadline ? new Date(goal.deadline).toISOString() : null,
-        // steps omis pour l'instant
+        steps: goal.steps ? goal.steps.map(s => ({
+          id: s.id, // Important pour l'update
+          title: s.title,
+          deadline: s.deadline ? new Date(s.deadline).toISOString() : null,
+          completed: s.completed || false
+        })) : [],
       };
-      console.log('Sending data:', data); // Pour déboguer
+      
+      console.log('Sending data:', data);
 
       if (editingGoal) {
+        // Mode UPDATE - on envoie TOUTES les données incluant les steps
         await updateGoalAPI(token, editingGoal.id, data);
       } else {
+        // Mode CREATE
         await createGoalAPI(token, data);
       }
-      await fetchGoals();
+      
+      await fetchGoals(); // Recharger les objectifs
       setShowForm(false);
       setEditingGoal(null);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde de l\'objectif');
+      alert('Erreur lors de la sauvegarde de l\'objectif: ' + error.message);
     }
   };
 
   const handleEditGoal = (goal) => {
+    console.log('Editing goal:', goal); // Debug
     setEditingGoal(goal);
     setShowForm(true);
   };
@@ -76,7 +88,7 @@ export default function Goals() {
         await fetchGoals();
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
-        alert('Erreur lors de la suppression de l\'objectif');
+        alert('Erreur lors de la suppression de l\'objectif: ' + error.message);
       }
     }
   };
@@ -88,12 +100,19 @@ export default function Goals() {
       await fetchGoals();
     } catch (error) {
       console.error('Erreur lors de la completion:', error);
-      alert('Erreur lors de la completion de l\'objectif');
+      alert('Erreur lors de la completion de l\'objectif: ' + error.message);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-8">Chargement...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -105,7 +124,10 @@ export default function Goals() {
           <p className="text-gray-600 mt-1">Définissez et suivez vos objectifs personnels</p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setEditingGoal(null);
+            setShowForm(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -121,8 +143,10 @@ export default function Goals() {
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-3 py-1 rounded-full text-sm ${
-                filter === status ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
+              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                filter === status 
+                  ? 'bg-indigo-100 text-indigo-700 font-medium' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               {status === 'all' ? 'Tous' : status === 'active' ? 'Actifs' : 'Terminés'}
@@ -132,30 +156,40 @@ export default function Goals() {
       </div>
 
       {/* Goals List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredGoals.map(goal => (
-          <GoalCard
-            key={goal.id}
-            goal={goal}
-            onEdit={handleEditGoal}
-            onDelete={handleDeleteGoal}
-            onComplete={handleCompleteGoal}
-            onToggleStep={() => {}} // Non implémenté pour l'instant
-          />
-        ))}
-      </div>
+      {filteredGoals.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">
+            {filter === 'all' 
+              ? 'Aucun objectif. Créez votre premier objectif !' 
+              : `Aucun objectif ${filter === 'active' ? 'actif' : 'terminé'}.`
+            }
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredGoals.map(goal => (
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onEdit={handleEditGoal}
+              onDelete={handleDeleteGoal}
+              onComplete={handleCompleteGoal}
+              onStepUpdate={fetchGoals} // Rafraîchir après update d'une étape
+            />
+          ))}
+        </div>
+      )}
 
       {/* Goal Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <GoalForm
-              goal={editingGoal}
-              onSave={handleSaveGoal}
-              onCancel={() => { setShowForm(false); setEditingGoal(null); }}
-            />
-          </div>
-        </div>
+        <GoalForm
+          goal={editingGoal}
+          onSave={handleSaveGoal}
+          onCancel={() => { 
+            setShowForm(false); 
+            setEditingGoal(null); 
+          }}
+        />
       )}
     </div>
   );

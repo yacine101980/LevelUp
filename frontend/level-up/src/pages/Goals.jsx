@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Filter } from 'lucide-react';
 import GoalCard from '../components/GoalCard';
@@ -12,12 +12,8 @@ export default function Goals() {
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
   const [filter, setFilter] = useState('all');
-
-  useEffect(() => {
-    fetchGoals();
-  }, [user]);
-
-  const fetchGoals = async () => {
+  
+  const fetchGoals = useCallback(async () => {
     if (!user) return;
     try {
       const token = localStorage.getItem('token');
@@ -28,7 +24,13 @@ export default function Goals() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+  
+  useEffect(() => {
+    fetchGoals();
+  }, [fetchGoals]);
+
+
 
   const filteredGoals = goals.filter(goal => {
     if (filter === 'active') return goal.status === 'active' ;

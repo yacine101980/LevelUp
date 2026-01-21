@@ -12,7 +12,7 @@ import {
 export default function Habits() {
   const { user } = useAuth();
   const [habits, setHabits] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
 

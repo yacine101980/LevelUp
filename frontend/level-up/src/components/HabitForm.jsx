@@ -19,7 +19,7 @@ export default function HabitForm({ habit, onSave, onCancel }) {
   const [frequency, setFrequency] = useState(habit?.frequency || 'daily');
   const [selectedIcon, setSelectedIcon] = useState(habit?.icon || '💪');
   const [selectedColor, setSelectedColor] = useState(habit?.color || '#3b82f6');
-  const [weeklyTarget, setWeeklyTarget] = useState(habit?.weekly_target || 1);
+  const [weeklyTarget, ] = useState(habit?.weekly_target || 1);
 
   const handleSubmit = (e) => {
     e.preventDefault();

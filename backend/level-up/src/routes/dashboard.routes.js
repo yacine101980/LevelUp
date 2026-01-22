@@ -1,0 +1,9 @@
+const router = require('express').Router()
+const auth = require('../middleware/auth.middleware')
+
+const dashboardController = require('../controllers/dashboard.controller')
+
+
+router.get('/', auth, dashboardController.getDashboard)
+
+module.exports = router

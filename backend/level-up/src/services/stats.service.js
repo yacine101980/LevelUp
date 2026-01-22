@@ -38,7 +38,7 @@ const getGoalStatsByCategory = async (userId) => {
 
 const getHabitStats = async (userId) => {
   const habits = await prisma.habit.findMany({
-    where: { user_id: userId },
+    where: { user_id: userId, is_archived: false },
     include: {
       habitLogs: true,
     },

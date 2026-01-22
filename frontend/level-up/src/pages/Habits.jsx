@@ -10,6 +10,7 @@ import {
   createHabitAPI,
   updateHabitAPI,
   archiveHabitAPI,
+  deleteHabitAPI,
   setHabitVisual,
 } from '../services/habitsService';
 import {
@@ -34,7 +35,8 @@ export default function Habits() {
   const fetchHabits = async () => {
     try {
       const token = localStorage.getItem('token');
-      const baseHabits = await getHabitsAPI(token);
+      // Récupérer toutes les habitudes (y compris archivées) pour la page Habits
+      const baseHabits = await getHabitsAPI(token, true);
 
       // Récupérer les logs sur les 7 derniers jours (pour l’affichage calendrier)
       const today = new Date();
@@ -244,7 +246,7 @@ export default function Habits() {
     if (!deleteModal.habitId) return;
     try {
       const token = localStorage.getItem('token');
-      await archiveHabitAPI(token, deleteModal.habitId); // Pour l'instant, on archive (le back ne supporte pas la vraie suppression)
+      await deleteHabitAPI(token, deleteModal.habitId);
       await fetchHabits();
       setDeleteModal({ visible: false, habitId: null, habitName: '' });
     } catch (error) {
@@ -289,18 +291,46 @@ export default function Habits() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {habits.map((habit) => (
-            <HabitCard
-              key={habit.id}
-              habit={habit}
-              onEdit={handleEditHabit}
-              onArchive={handleArchiveHabit}
-              onDelete={handleDeleteHabit}
-              onToggle={handleToggleHabitToday}
-            />
-          ))}
-        </div>
+        <>
+          {/* Habitudes actives */}
+          {habits.filter(h => !h.is_archived).length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Habitudes actives</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {habits.filter(h => !h.is_archived).map((habit) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                    onEdit={handleEditHabit}
+                    onArchive={handleArchiveHabit}
+                    onDelete={handleDeleteHabit}
+                    onToggle={handleToggleHabitToday}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Habitudes archivées */}
+          {habits.filter(h => h.is_archived).length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-500 mb-4">Habitudes archivées</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {habits.filter(h => h.is_archived).map((habit) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                    onEdit={handleEditHabit}
+                    onArchive={handleArchiveHabit}
+                    onDelete={handleDeleteHabit}
+                    onToggle={handleToggleHabitToday}
+                    isArchived={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {showForm && (

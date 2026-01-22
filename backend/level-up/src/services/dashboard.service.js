@@ -21,7 +21,7 @@ const getDashboard = async (userId) => {
   const completedGoals = goals.filter(g => g.status === 'completed').length
   const activeGoals = goals.filter(g => g.status === 'active').length
 
-  const totalHabits = habits.length
+  const totalHabits = habits.filter(h => !h.is_archived).length
 
   return {
     goals: {

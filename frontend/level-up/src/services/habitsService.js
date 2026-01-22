@@ -8,6 +8,30 @@ const pickVisual = (id = 0) => ({
   color: colors[id % colors.length],
 });
 
+const VISUALS_KEY = 'habit_visuals';
+
+export const setHabitVisual = (habitId, { icon, color }) => {
+  try {
+    const raw = localStorage.getItem(VISUALS_KEY);
+    const map = raw ? JSON.parse(raw) : {};
+    map[String(habitId)] = { icon, color };
+    localStorage.setItem(VISUALS_KEY, JSON.stringify(map));
+  } catch {
+    // ignore storage issues
+  }
+};
+
+const getHabitVisual = (habitId) => {
+  try {
+    const raw = localStorage.getItem(VISUALS_KEY);
+    if (!raw) return null;
+    const map = JSON.parse(raw);
+    return map?.[String(habitId)] || null;
+  } catch {
+    return null;
+  }
+};
+
 const parseError = async (response, fallback) => {
   try {
     const data = await response.json();
@@ -18,7 +42,10 @@ const parseError = async (response, fallback) => {
 };
 
 const normalizeHabit = (habit) => {
-  const { icon, color } = pickVisual(habit.id);
+  const stored = getHabitVisual(habit.id);
+  const fallback = pickVisual(habit.id);
+  const icon = stored?.icon || fallback.icon;
+  const color = stored?.color || fallback.color;
   const logs = (habit.habitLogs || []).map((log) => ({
     date: new Date(log.date).toISOString().split('T')[0],
     completed: log.is_completed,

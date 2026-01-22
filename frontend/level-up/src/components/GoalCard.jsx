@@ -119,7 +119,7 @@ export default function GoalCard({ goal, onEdit, onDelete, onToggleStep,onComple
       )}
 
      
-    {goal.status!=='abandoned' && (
+    {goal.status !== 'abandoned' && goal.status !== 'completed' && (
               <button
                 onClick={() => onAbandon(goal.id)}
                 className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"

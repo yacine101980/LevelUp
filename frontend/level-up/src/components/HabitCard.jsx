@@ -1,7 +1,7 @@
 import React from 'react';
-import { Edit2, Trash2, Flame, Calendar, CheckCircle2 } from 'lucide-react';
+import { Edit2, Trash2, Archive, Flame, Calendar, CheckCircle2 } from 'lucide-react';
 
-export default function HabitCard({ habit, onEdit, onDelete, onToggle }) {
+export default function HabitCard({ habit, onEdit, onArchive, onDelete, onToggle }) {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   
@@ -37,12 +37,21 @@ export default function HabitCard({ habit, onEdit, onDelete, onToggle }) {
           <button
             onClick={() => onEdit(habit)}
             className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            title="Modifier"
           >
             <Edit2 className="w-4 h-4" />
           </button>
           <button
+            onClick={() => onArchive(habit.id)}
+            className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+            title="Archiver"
+          >
+            <Archive className="w-4 h-4" />
+          </button>
+          <button
             onClick={() => onDelete(habit.id)}
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Supprimer définitivement"
           >
             <Trash2 className="w-4 h-4" />
           </button>

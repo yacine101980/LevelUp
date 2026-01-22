@@ -5,6 +5,8 @@ const goalsRoutes = require('./routes/goals.routes')
 const habitsRoutes = require('./routes/habits.routes')
 const stepsRoutes = require('./routes/steps.routes')
 const logHabitsRoutes = require('./routes/habitLog.routes')
+const dashboardRoutes = require('./routes/dashboard.routes')
+const statsRoutes = require('./routes/stats.routes')
 const swaggerUi = require('swagger-ui-express')
 const swaggerSpec = require('./config/swagger')
 
@@ -19,5 +21,9 @@ app.use('/api/goals', goalsRoutes)
 app.use('/api/habits', habitsRoutes)
 app.use('/api/steps', stepsRoutes)
 app.use('/api/habitsLog', logHabitsRoutes)
+app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/stats', statsRoutes)
+
+
 
 module.exports = app

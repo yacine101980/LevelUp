@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: ./backend/level-up
+    container_name: levelup-backend
+    ports:
+      - "5001:3000"
+    volumes:
+      - ./backend/level-up:/usr/src/app
+    env_file:
+      - ./backend/level-up/.env
+    depends_on:
+      - postgres
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run dev"
+
+  frontend:
+    build:
+      context: ./frontend/level-up
+    container_name: levelup-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/level-up:/app
+    working_dir: /app
+    depends_on:
+      - backend
+    command: sh -c "npm ci && npm start"
+
+
+  postgres:
+    image: postgres:15
+    container_name: levelup-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: levelup
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

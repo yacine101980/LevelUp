@@ -93,7 +93,7 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Run Prisma migrations
+      - name: Run Prisma migrations (test database)
         env:
           DATABASE_URL: postgresql://admin:password@localhost:5432/levelup_test
         run: npx prisma migrate deploy
@@ -117,7 +117,7 @@ jobs:
           path: ./backend/level-up/dist
           retention-days: 7
 
-  # Docker Build Job
+  # Docker Build Job and push to Docker Hub
   docker-build:
     name: Build Docker Images
     runs-on: ubuntu-latest
@@ -150,4 +150,42 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push backend Docker image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/level-up
+          file: ./backend/level-up/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/levelup-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Deploy Job to Render
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    # Only deploy on develop branch pushes (not on PRs)
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy Backend to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          api-key: ${{ secrets.RENDER_API_KEY }}
+          service-id: ${{ secrets.RENDER_BACKEND_SERVICE_ID }}
+      - name: Deploy Frontend to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          api-key: ${{ secrets.RENDER_API_KEY }}
+          service-id: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
 

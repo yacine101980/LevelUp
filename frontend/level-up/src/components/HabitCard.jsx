@@ -3,6 +3,7 @@ import { Edit2, Trash2, Flame, Calendar, CheckCircle2 } from 'lucide-react';
 
 export default function HabitCard({ habit, onEdit, onDelete, onToggle }) {
   const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
   
   // Générer les 7 derniers jours pour le calendrier visuel
   const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -80,31 +81,36 @@ export default function HabitCard({ habit, onEdit, onDelete, onToggle }) {
           {last7Days.map((date) => {
             const dateStr = date.toISOString().split('T')[0];
             const log = logs.find((l) => l.date === dateStr);
-            const isToday = dateStr === today.toISOString().split('T')[0];
+            const isToday = dateStr === todayStr;
+            const isCompleted = !!log?.completed;
 
             return (
               <button
                 key={dateStr}
-                // onClick={() => onToggle(habit.id, dateStr)}
+                onClick={() => {
+                  if (!onToggle) return;
+                  onToggle(habit.id, dateStr, isCompleted);
+                }}
+                disabled={!isToday}
                 className={`aspect-square rounded-lg flex flex-col items-center justify-center p-2 transition-all ${
-                  log?.completed
+                  isCompleted
                     ? 'shadow-sm'
                     : isToday
                     ? 'border-2 hover:bg-gray-50'
                     : 'border border-gray-200 hover:bg-gray-50'
-                }`}
+                } ${!isToday ? 'opacity-60 cursor-not-allowed' : ''}`}
                 style={{
-                  backgroundColor: log?.completed ? habit.color : 'white',
-                  borderColor: isToday && !log?.completed ? habit.color : undefined,
+                  backgroundColor: isCompleted ? habit.color : 'white',
+                  borderColor: isToday && !isCompleted ? habit.color : undefined,
                 }}
               >
-                <span className={`text-xs font-medium ${log?.completed ? 'text-white' : 'text-gray-600'}`}>
+                <span className={`text-xs font-medium ${isCompleted ? 'text-white' : 'text-gray-600'}`}>
                   {date.toLocaleDateString('fr-FR', { weekday: 'short' }).charAt(0).toUpperCase()}
                 </span>
-                <span className={`text-xs ${log?.completed ? 'text-white' : 'text-gray-500'}`}>
+                <span className={`text-xs ${isCompleted ? 'text-white' : 'text-gray-500'}`}>
                   {date.getDate()}
                 </span>
-                {log?.completed && <CheckCircle2 className="w-4 h-4 text-white mt-1" />}
+                {isCompleted && <CheckCircle2 className="w-4 h-4 text-white mt-1" />}
               </button>
             );
           })}

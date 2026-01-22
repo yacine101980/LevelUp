@@ -1,7 +1,8 @@
 import React, { useState, useEffect} from 'react';
 import { X, Plus, Trash2, Edit2, CheckCircle2, Save } from 'lucide-react';
+import EncouragementToast from './EncouragementToast';
 
-export default function GoalForm({ goal, onSave, onCancel }) {
+export default function GoalForm({ goal, onSave, onCancel, onStepComplete }) {
   // Initialisation des états avec les valeurs par défaut
   const [title, setTitle] = useState(goal?.title || '');
   const [description, setDescription] = useState(goal?.description || '');
@@ -14,6 +15,7 @@ export default function GoalForm({ goal, onSave, onCancel }) {
   const [steps, setSteps] = useState([]);
   const [newStepTitle, setNewStepTitle] = useState('');
   const [newStepDeadline, setNewStepDeadline] = useState('');
+  const [encouragementToast, setEncouragementToast] = useState({ visible: false, stepTitle: '' });
 
   useEffect(() => {
     if (goal) {
@@ -58,7 +60,28 @@ export default function GoalForm({ goal, onSave, onCancel }) {
   };
 
   const handleCompleteStep = (stepId) => {
-    setSteps(steps.map(s => s.id === stepId ? { ...s, completed: !s.completed } : s));
+    const updatedSteps = steps.map(s => {
+      if (s.id === stepId) {
+        const newCompleted = !s.completed;
+        // Afficher le toast d'encouragement seulement si on complète (pas si on décoche)
+        if (newCompleted) {
+          setEncouragementToast({
+            visible: true,
+            stepTitle: s.title || 'cette étape',
+          });
+        }
+        return { ...s, completed: newCompleted };
+      }
+      return s;
+    });
+    setSteps(updatedSteps);
+
+    // Vérifier si toutes les étapes sont complétées
+    const allCompleted = updatedSteps.length > 0 && updatedSteps.every(s => s.completed);
+    if (allCompleted && onStepComplete) {
+      // Appeler la callback pour marquer l'objectif comme terminé
+      onStepComplete(goal?.id);
+    }
   };
 
   const startEditingStep = (stepId) => {
@@ -334,6 +357,12 @@ export default function GoalForm({ goal, onSave, onCancel }) {
           </div>
         </form>
       </div>
+
+      <EncouragementToast
+        visible={encouragementToast.visible}
+        stepTitle={encouragementToast.stepTitle}
+        onClose={() => setEncouragementToast({ visible: false, stepTitle: '' })}
+      />
     </div>
   );
 }

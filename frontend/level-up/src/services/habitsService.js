@@ -66,8 +66,11 @@ const normalizeHabit = (habit) => {
   };
 };
 
-export const getHabitsAPI = async (token) => {
-  const response = await fetch(`${API_BASE}/habits`, {
+export const getHabitsAPI = async (token, includeArchived = false) => {
+  const url = includeArchived 
+    ? `${API_BASE}/habits?includeArchived=true`
+    : `${API_BASE}/habits`;
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error(await parseError(response, 'Erreur lors du chargement des habitudes'));
@@ -84,7 +87,7 @@ export const createHabitAPI = async (token, payload) => {
     },
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la création de l’habitude'));
+  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la création de l'));
   return normalizeHabit(await response.json());
 };
 
@@ -106,6 +109,15 @@ export const archiveHabitAPI = async (token, id) => {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la suppression de l’habitude'));
+  if (!response.ok) throw new Error(await parseError(response, 'Erreur '));
   return await response.json();
+};
+
+export const deleteHabitAPI = async (token, id) => {
+  const response = await fetch(`${API_BASE}/habits/${id}/delete`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la suppression '));
+  return true;
 };

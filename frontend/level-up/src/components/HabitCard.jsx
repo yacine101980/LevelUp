@@ -1,7 +1,7 @@
 import React from 'react';
 import { Edit2, Trash2, Archive, Flame, Calendar, CheckCircle2 } from 'lucide-react';
 
-export default function HabitCard({ habit, onEdit, onArchive, onDelete, onToggle }) {
+export default function HabitCard({ habit, onEdit, onArchive, onDelete, onToggle, isArchived = false }) {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   
@@ -17,7 +17,9 @@ export default function HabitCard({ habit, onEdit, onArchive, onDelete, onToggle
 
   return (
     <div
-      className="bg-white rounded-xl p-6 border-2 shadow-sm transition-all hover:shadow-md"
+      className={`bg-white rounded-xl p-6 border-2 shadow-sm transition-all hover:shadow-md ${
+        isArchived ? 'opacity-60 grayscale' : ''
+      }`}
       style={{ borderColor: `${(habit.color || '#3b82f6')}40` }}
     >
       <div className="flex items-start justify-between mb-4">
@@ -34,20 +36,24 @@ export default function HabitCard({ habit, onEdit, onArchive, onDelete, onToggle
           </div>
         </div>
         <div className="flex items-center gap-2 ml-4">
-          <button
-            onClick={() => onEdit(habit)}
-            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-            title="Modifier"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onArchive(habit.id)}
-            className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-            title="Archiver"
-          >
-            <Archive className="w-4 h-4" />
-          </button>
+          {!isArchived && (
+            <>
+              <button
+                onClick={() => onEdit(habit)}
+                className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                title="Modifier"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onArchive(habit.id)}
+                className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                title="Archiver"
+              >
+                <Archive className="w-4 h-4" />
+              </button>
+            </>
+          )}
           <button
             onClick={() => onDelete(habit.id)}
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -97,10 +103,10 @@ export default function HabitCard({ habit, onEdit, onArchive, onDelete, onToggle
               <button
                 key={dateStr}
                 onClick={() => {
-                  if (!onToggle) return;
+                  if (!onToggle || isArchived) return;
                   onToggle(habit.id, dateStr, isCompleted);
                 }}
-                disabled={!isToday}
+                disabled={!isToday || isArchived}
                 className={`aspect-square rounded-lg flex flex-col items-center justify-center p-2 transition-all ${
                   isCompleted
                     ? 'shadow-sm'

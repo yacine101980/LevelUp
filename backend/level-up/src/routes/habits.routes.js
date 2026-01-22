@@ -235,6 +235,7 @@ router.put('/:id', htrl.update)
  *         description: Unauthorized
  */
 router.delete('/:id', htrl.archive)
+router.delete('/:id/delete', htrl.delete)
 
 
 module.exports = router

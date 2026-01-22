@@ -7,6 +7,7 @@ exports.create = async (req, res) => {
 
 exports.complete = async (req, res) => {
   const step = await stepService.completeStep(req.params.id)
+    await gamificationService.onStepCompleted(step.user_id)
   res.json(step)
 }
 

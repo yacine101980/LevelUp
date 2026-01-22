@@ -11,6 +11,8 @@ exports.logToday = async (req, res) => {
       notes
     )
 
+     await gamificationService.onHabitLogged(req.user.id, Number(id))
+
     res.status(201).json(log)
   } catch (e) {
     res.status(409).json({ message: e.message })

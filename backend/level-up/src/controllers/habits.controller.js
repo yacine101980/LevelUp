@@ -1,7 +1,8 @@
 const habitService = require('../services/habits.service')
-
+const gamificationService = require('../services/gamification.service')
 exports.create = async (req, res) => {
   const habit = await habitService.createHabit(req.user.id, req.body)
+  await gamificationService.onHabitCreated(req.user.id)
   res.status(201).json(habit)
 }
 

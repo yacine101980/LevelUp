@@ -1,5 +1,5 @@
 const habitLogService = require('../services/habitLog.service')
-
+const gamificationService = require('../services/gamification.service')
 exports.logToday = async (req, res) => {
   try {
     const { id } = req.params
@@ -10,6 +10,8 @@ exports.logToday = async (req, res) => {
       req.user.id,
       notes
     )
+
+     await gamificationService.onHabitLogged(req.user.id, Number(id))
 
     res.status(201).json(log)
   } catch (e) {

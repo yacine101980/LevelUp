@@ -1,4 +1,5 @@
 const authService = require('../services/auth.service')
+const gamificationService = require('../services/gamification.service')
 
 exports.register = async (req, res) => {
   try {
@@ -26,7 +27,8 @@ exports.login = async (req, res) => {
 }
 
 exports.me = async (req, res) => {
-  res.json(await authService.getProfile(req.user.id))
+  const me = await authService.getProfile(req.user.id)
+  res.json(me)
 }
 
 exports.logout = async (req, res) => {

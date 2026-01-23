@@ -1,7 +1,9 @@
 const goalService = require('../services/goals.service')
+const gamificationService = require('../services/gamification.service')
 
 exports.create = async (req, res) => {
   const goal = await goalService.createGoal(req.user.id, req.body)
+    await gamificationService.onGoalCreated(req.user.id)
   res.status(201).json(goal)
 }
 
@@ -23,6 +25,7 @@ exports.update = async (req, res) => {
 
 exports.complete = async (req, res) => {
   const goal = await goalService.completeGoal(req.params.id)
+  await gamificationService.onGoalCompleted(goal.user_id)
   res.json(goal)
 }
 

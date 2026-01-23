@@ -80,9 +80,6 @@ export default function Dashboard() {
   // Pourcentage (0 → 100)
   const xpPercentage = (xpProgress / xpPerLevel) * 100;
 
-  // XP restante
-  const xpRemaining = xpPerLevel - xpProgress;
-
 
   // const maxStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
 

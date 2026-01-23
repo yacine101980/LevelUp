@@ -7,7 +7,7 @@ import { getGlobalStatsAPI, getGoalStatsAPI, getHabitStatsAPI } from '../service
 import { getHabitsAPI } from '../services/habitsService';
 
 export default function Dashboard() {
-  const { user,  } = useAuth();
+  const { user, } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [globalStats, setGlobalStats] = useState(null);
@@ -30,7 +30,7 @@ export default function Dashboard() {
         setLoading(false);
         return;
       }
-      
+
       // Charger toutes les données en parallèle
       const [dashboard, stats, goalsStats, habitsStats, habitsData] = await Promise.all([
         getDashboardAPI(token),
@@ -68,11 +68,21 @@ export default function Dashboard() {
   }
 
   // Calculs pour l'affichage
-  const userLevel = user?.level || 1;
-  const userXp = user?.xp_points || 0;
-  // const xpForNextLevel = userLevel * 500;
-  const xpProgress = userXp % 100;
-  const xpPercentage = (xpProgress / 100) * 100;
+  const userXp = user?.xp_points ?? 0;
+  const userLevel = user?.level ?? 1;
+
+  // XP nécessaire pour passer UN niveau
+  const xpPerLevel = (userLevel +1) * 100;
+
+  // XP dans le niveau actuel
+  const xpProgress = userXp % xpPerLevel;
+
+  // Pourcentage (0 → 100)
+  const xpPercentage = (xpProgress / xpPerLevel) * 100;
+
+  // XP restante
+  const xpRemaining = xpPerLevel - xpProgress;
+
 
   // const maxStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
 
@@ -112,7 +122,7 @@ export default function Dashboard() {
             <div className="text-3xl font-bold">{userLevel}</div>
           </div>
         </div>
-        
+
         {/* Barre d'XP */}
         <div className="mt-6 bg-white/20 backdrop-blur-sm rounded-lg p-1">
           <div
@@ -121,7 +131,7 @@ export default function Dashboard() {
           />
         </div>
         <p className="text-sm text-indigo-100 mt-2">
-          {100-userXp} points Jusqu'au niveau {userLevel + 1}
+          {(100 * (userLevel + 1)) - userXp} points restants jusqu'au niveau {userLevel + 1}
         </p>
       </div>
 

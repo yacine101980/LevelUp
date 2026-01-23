@@ -19,7 +19,7 @@ import {
   deleteHabitLogAPI,
 } from '../services/habitLogsService';
 export default function Habits() {
-  const { user } = useAuth();
+  const { user, fetchUserProfile } = useAuth();
   const [habits, setHabits] = useState([]);
   const [, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -119,11 +119,12 @@ export default function Habits() {
     try {
       const token = localStorage.getItem('token');
       const habit = habits.find((h) => h.id === habitId);
-
       if (isCurrentlyCompleted) {
         await deleteHabitLogAPI(token, habitId, dateStr);
+        await fetchUserProfile(token);
       } else {
         await logHabitTodayAPI(token, habitId, { notes: '' });
+        await fetchUserProfile(token);
       }
 
       // Refresh ciblé des logs (7 derniers jours) pour cette habitude

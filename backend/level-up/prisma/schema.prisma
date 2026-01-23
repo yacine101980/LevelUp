@@ -14,61 +14,62 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String
-  level     Int      @default(1)
-  xp_points Int      @default(0)
-  goals     Goal[]
-  habits    Habit[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id         Int         @id @default(autoincrement())
+  email      String      @unique
+  password   String
+  name       String
+  level      Int         @default(1)
+  xp_points  Int         @default(0)
+  goals      Goal[]
+  habits     Habit[]
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  userBadges UserBadge[]
 }
 
 model Goal {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   title        String
   description  String?
   category     String?
-  priority     Priority @default(medium)
+  priority     Priority   @default(medium)
   status       GoalStatus @default(active)
   start_date   DateTime?
   deadline     DateTime?
   completed_at DateTime?
-  user         User     @relation(fields: [user_id], references: [id])
+  user         User       @relation(fields: [user_id], references: [id])
   user_id      Int
   steps        Step[]
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
 }
 
 model Step {
-  id           Int      @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   title        String
   deadline     DateTime?
-  is_completed Boolean  @default(false)
+  is_completed Boolean   @default(false)
   order        Int?
-  goal         Goal     @relation(fields: [goal_id], references: [id])
+  goal         Goal      @relation(fields: [goal_id], references: [id])
   goal_id      Int
-  created_at   DateTime @default(now())
+  created_at   DateTime  @default(now())
   completed_at DateTime?
 }
 
 model Habit {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   name          String
   description   String?
   category      String?
   frequency     Frequency
   weekly_target Int?
   start_date    DateTime?
-  is_archived   Boolean  @default(false)
-  user          User     @relation(fields: [user_id], references: [id])
+  is_archived   Boolean    @default(false)
+  user          User       @relation(fields: [user_id], references: [id])
   user_id       Int
   habitLogs     HabitLog[]
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
 }
 
 model HabitLog {
@@ -81,6 +82,26 @@ model HabitLog {
   created_at   DateTime @default(now())
 
   @@unique([habit_id, date])
+}
+
+model Badge {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String
+  icon        String
+  criteria    String      @unique
+  users       UserBadge[]
+}
+
+model UserBadge {
+  user_id   Int
+  badge_id  Int
+  earned_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id])
+  badge Badge @relation(fields: [badge_id], references: [id])
+
+  @@id([user_id, badge_id])
 }
 
 enum Priority {

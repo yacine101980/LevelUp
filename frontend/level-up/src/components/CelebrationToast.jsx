@@ -28,7 +28,7 @@ export default function CelebrationToast({ message, habitName, goalTitle, onClos
               <h3 className="font-bold text-lg">Bravo ! 🎉</h3>
             </div>
             <p className="text-white/90 text-sm leading-relaxed">
-              {message || (habitName ? `Vous avez complété "${habitName}" aujourd'hui !` : goalTitle ? `Félicitations ! Vous avez terminé "${goalTitle}" ! 🎊` : 'Félicitations !')}
+              {message || (habitName ? `Vous avez complété "${habitName}" aujourd'hui !. Vous avez gagné 5 points XP. ` : goalTitle ? `Félicitations ! Vous avez terminé "${goalTitle}" ! 🎊. Vous avez gagné 50 points XP. ` : 'Félicitations !. Vous avez gagné 5 points XP. ')}
             </p>
             <p className="text-white/80 text-xs mt-2 italic">
               {goalTitle ? 'Vous avez accompli quelque chose de formidable ! 🌟' : 'Continuez comme ça, vous êtes sur la bonne voie ! 💪'}

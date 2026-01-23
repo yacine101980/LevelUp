@@ -172,8 +172,8 @@ jobs:
     name: Deploy to Render
     runs-on: ubuntu-latest
     needs: [docker-build]
-    # Only deploy on develop branch pushes (not on PRs)
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    # Only deploy on main branch pushes (not on PRs)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

@@ -18,7 +18,7 @@ const options = {
         description: 'Development server',
       },
       {
-        url: process.env.API_URL || 'https://api.levelup.com',
+        url: process.env.API_URL || 'https://levelup-1gqw.onrender.com',
         description: 'Production server',
       },
     ],

@@ -18,13 +18,9 @@ services:
       context: ./frontend/level-up
     container_name: levelup-frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend/level-up:/app
-    working_dir: /app
+      - "3000:80"
     depends_on:
       - backend
-    command: sh -c "npm ci && npm start"
 
 
   postgres:

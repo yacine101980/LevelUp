@@ -1,5 +1,5 @@
 const habitLogService = require('../services/habitLog.service')
-
+const gamificationService = require('../services/gamification.service')
 exports.logToday = async (req, res) => {
   try {
     const { id } = req.params

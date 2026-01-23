@@ -1,5 +1,5 @@
 const stepService = require('../services/steps.service')
-
+const gamificationService = require('../services/gamification.service')
 exports.create = async (req, res) => {
   const step = await stepService.createStep(req.params.id, req.body)
   res.status(201).json(step)

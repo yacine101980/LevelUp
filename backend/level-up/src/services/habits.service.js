@@ -18,7 +18,16 @@ exports.getAllHabits = (userId) => {
   })
 }
 
-exports.deleteHabit = (id) => {
+exports.deleteHabit = async (id) => {
+  const habit = await prisma.habit.findFirst({
+    where: { id: parseInt(id, 10) },
+  })
+  if (!habit) {
+    throw new Error('Habit not found')
+  }
+  await prisma.habitLog.deleteMany({
+    where: { habit_id: habit.id },
+  })
   return prisma.habit.delete({
     where: { id: parseInt(id, 10) },
   })

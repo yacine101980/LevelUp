@@ -7,7 +7,7 @@ import { getGlobalStatsAPI, getGoalStatsAPI, getHabitStatsAPI } from '../service
 import { getHabitsAPI } from '../services/habitsService';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user,  } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [globalStats, setGlobalStats] = useState(null);
@@ -71,8 +71,8 @@ export default function Dashboard() {
   const userLevel = user?.level || 1;
   const userXp = user?.xp_points || 0;
   // const xpForNextLevel = userLevel * 500;
-  const xpProgress = userXp % 500;
-  const xpPercentage = (xpProgress / 500) * 100;
+  const xpProgress = userXp % 100;
+  const xpPercentage = (xpProgress / 100) * 100;
 
   // const maxStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
 
@@ -121,7 +121,7 @@ export default function Dashboard() {
           />
         </div>
         <p className="text-sm text-indigo-100 mt-2">
-          {xpProgress} / 500 points jusqu'au niveau {userLevel + 1}
+          {100-userXp} points Jusqu'au niveau {userLevel + 1}
         </p>
       </div>
 

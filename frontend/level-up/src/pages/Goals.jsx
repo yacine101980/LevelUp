@@ -8,7 +8,7 @@ import CelebrationToast from '../components/CelebrationToast';
 import { getGoalsAPI, createGoalAPI, updateGoalAPI, deleteGoalAPI, completeGoalAPI, abandonGoalAPI } from '../services/goalsService';
 
 export default function Goals() {
-  const { user } = useAuth();
+  const { user,fetchUserProfile } = useAuth();
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -143,6 +143,7 @@ export default function Goals() {
     try {
       const token = localStorage.getItem('token');
       await completeGoalAPI(token, id);
+      await fetchUserProfile(token);
       const goal = goals.find((g) => g.id === id);
       setCelebrationToast({
         visible: true,

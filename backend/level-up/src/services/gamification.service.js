@@ -97,9 +97,14 @@ exports.getUserXp = async (userId) => {
   const levels = [
     { level: 1, name: 'Débutant', min: 0 },
     { level: 2, name: 'Motivé', min: 100 },
-    { level: 3, name: 'Discipliné', min: 300 },
-    { level: 4, name: 'Expert', min: 600 },
-    { level: 5, name: 'Maître', min: 1000 }
+    { level: 3, name: 'Discipliné', min: 200 },
+    { level: 4, name: 'Expert', min: 300 },
+    { level: 5, name: 'Maître', min: 400 },
+    { level: 6, name: 'Grand Maître', min: 500 },
+    { level: 7, name: 'Élite', min: 600 },
+    { level: 8, name: 'Champion', min: 700 },
+    { level: 9, name: 'Grand Champion', min: 800 },
+    { level: 10, name: 'Ultra', min: 900 }
   ]
 
   const current = [...levels].reverse().find(l => user.xp >= l.min)

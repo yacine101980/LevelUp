@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { Plus, Filter } from 'lucide-react';
 import GoalCard from '../components/GoalCard';
 import GoalForm from '../components/GoalForm';
+import AbandonConfirmModal from '../components/AbandonConfirmModal';
+import CelebrationToast from '../components/CelebrationToast';
 import { getGoalsAPI, createGoalAPI, updateGoalAPI, deleteGoalAPI, completeGoalAPI, abandonGoalAPI } from '../services/goalsService';
 
 export default function Goals() {
@@ -12,6 +14,8 @@ export default function Goals() {
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [abandonModal, setAbandonModal] = useState({ visible: false, goalId: null, goalTitle: '' });
+  const [celebrationToast, setCelebrationToast] = useState({ visible: false, goalTitle: '' });
   
   const fetchGoals = useCallback(async () => {
     if (!user) return;
@@ -60,12 +64,29 @@ export default function Goals() {
       
       console.log('Sending data:', data);
 
+      let goalId = editingGoal?.id;
       if (editingGoal) {
         // Mode UPDATE - on envoie TOUTES les données incluant les steps
         await updateGoalAPI(token, editingGoal.id, data);
       } else {
         // Mode CREATE
-        await createGoalAPI(token, data);
+        const created = await createGoalAPI(token, data);
+        goalId = created.id;
+      }
+      
+      // Vérifier si toutes les étapes sont complétées
+      const allStepsCompleted = goal.steps && goal.steps.length > 0 && goal.steps.every(s => s.completed);
+      if (allStepsCompleted && goalId) {
+        // Marquer l'objectif comme terminé automatiquement
+        try {
+          await completeGoalAPI(token, goalId);
+          setCelebrationToast({
+            visible: true,
+            goalTitle: goal.title || 'cet objectif',
+          });
+        } catch (error) {
+          console.error('Erreur lors de la complétion automatique:', error);
+        }
       }
       
       await fetchGoals(); // Recharger les objectifs
@@ -96,11 +117,22 @@ export default function Goals() {
     }
   };
 
-  const handleAbandonGoal = async (id) => {
+  const handleAbandonGoal = (id) => {
+    const goal = goals.find((g) => g.id === id);
+    setAbandonModal({
+      visible: true,
+      goalId: id,
+      goalTitle: goal?.title || 'cet objectif',
+    });
+  };
+
+  const confirmAbandonGoal = async () => {
+    if (!abandonModal.goalId) return;
     try {
       const token = localStorage.getItem('token');
-      await abandonGoalAPI(token, id);
+      await abandonGoalAPI(token, abandonModal.goalId);
       await fetchGoals();
+      setAbandonModal({ visible: false, goalId: null, goalTitle: '' });
     } catch (error) {
       console.error('Erreur lors de l\'abandon:', error);
       alert('Erreur lors de l\'abandon de l\'objectif: ' + error.message);
@@ -111,10 +143,32 @@ export default function Goals() {
     try {
       const token = localStorage.getItem('token');
       await completeGoalAPI(token, id);
+      const goal = goals.find((g) => g.id === id);
+      setCelebrationToast({
+        visible: true,
+        goalTitle: goal?.title || 'cet objectif',
+      });
       await fetchGoals();
     } catch (error) {
       console.error('Erreur lors de la completion:', error);
       alert('Erreur lors de la completion de l\'objectif: ' + error.message);
+    }
+  };
+
+  const handleStepComplete = async (goalId) => {
+    if (!goalId) return;
+    try {
+      const token = localStorage.getItem('token');
+      // Marquer l'objectif comme terminé automatiquement
+      await completeGoalAPI(token, goalId);
+      const goal = goals.find((g) => g.id === goalId);
+      setCelebrationToast({
+        visible: true,
+        goalTitle: goal?.title || 'cet objectif',
+      });
+      await fetchGoals();
+    } catch (error) {
+      console.error('Erreur lors de la complétion automatique:', error);
     }
   };
 
@@ -200,12 +254,29 @@ export default function Goals() {
         <GoalForm
           goal={editingGoal}
           onSave={handleSaveGoal}
+          onStepComplete={handleStepComplete}
           onCancel={() => { 
             setShowForm(false); 
             setEditingGoal(null); 
           }}
         />
       )}
+
+      {/* Abandon Confirmation Modal */}
+      <AbandonConfirmModal
+        visible={abandonModal.visible}
+        goalTitle={abandonModal.goalTitle}
+        onConfirm={confirmAbandonGoal}
+        onCancel={() => setAbandonModal({ visible: false, goalId: null, goalTitle: '' })}
+      />
+
+      {/* Celebration Toast for Goals */}
+      <CelebrationToast
+        visible={celebrationToast.visible}
+        habitName={celebrationToast.goalTitle}
+        message={`Félicitations ! Vous avez terminé "${celebrationToast.goalTitle}" ! 🎊`}
+        onClose={() => setCelebrationToast({ visible: false, goalTitle: '' })}
+      />
     </div>
   );
 }

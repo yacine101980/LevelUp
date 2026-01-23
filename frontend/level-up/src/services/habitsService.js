@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5001/api';
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 const icons = ['💪', '📚', '🏃', '🧘', '💧', '🎯', '✍️', '🎨', '🎵', '🌱'];
 const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16'];
@@ -7,6 +7,30 @@ const pickVisual = (id = 0) => ({
   icon: icons[id % icons.length],
   color: colors[id % colors.length],
 });
+
+const VISUALS_KEY = 'habit_visuals';
+
+export const setHabitVisual = (habitId, { icon, color }) => {
+  try {
+    const raw = localStorage.getItem(VISUALS_KEY);
+    const map = raw ? JSON.parse(raw) : {};
+    map[String(habitId)] = { icon, color };
+    localStorage.setItem(VISUALS_KEY, JSON.stringify(map));
+  } catch {
+    // ignore storage issues
+  }
+};
+
+const getHabitVisual = (habitId) => {
+  try {
+    const raw = localStorage.getItem(VISUALS_KEY);
+    if (!raw) return null;
+    const map = JSON.parse(raw);
+    return map?.[String(habitId)] || null;
+  } catch {
+    return null;
+  }
+};
 
 const parseError = async (response, fallback) => {
   try {
@@ -18,7 +42,10 @@ const parseError = async (response, fallback) => {
 };
 
 const normalizeHabit = (habit) => {
-  const { icon, color } = pickVisual(habit.id);
+  const stored = getHabitVisual(habit.id);
+  const fallback = pickVisual(habit.id);
+  const icon = stored?.icon || fallback.icon;
+  const color = stored?.color || fallback.color;
   const logs = (habit.habitLogs || []).map((log) => ({
     date: new Date(log.date).toISOString().split('T')[0],
     completed: log.is_completed,
@@ -39,8 +66,11 @@ const normalizeHabit = (habit) => {
   };
 };
 
-export const getHabitsAPI = async (token) => {
-  const response = await fetch(`${API_BASE}/habits`, {
+export const getHabitsAPI = async (token, includeArchived = false) => {
+  const url = includeArchived 
+    ? `${API_BASE}/habits?includeArchived=true`
+    : `${API_BASE}/habits`;
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error(await parseError(response, 'Erreur lors du chargement des habitudes'));
@@ -57,7 +87,7 @@ export const createHabitAPI = async (token, payload) => {
     },
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la création de l’habitude'));
+  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la création de l'));
   return normalizeHabit(await response.json());
 };
 
@@ -79,6 +109,15 @@ export const archiveHabitAPI = async (token, id) => {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la suppression de l’habitude'));
+  if (!response.ok) throw new Error(await parseError(response, 'Erreur '));
   return await response.json();
+};
+
+export const deleteHabitAPI = async (token, id) => {
+  const response = await fetch(`${API_BASE}/habits/${id}/delete`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error(await parseError(response, 'Erreur lors de la suppression '));
+  return true;
 };

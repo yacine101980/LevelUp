@@ -19,7 +19,7 @@ export default function HabitForm({ habit, onSave, onCancel }) {
   const [frequency, setFrequency] = useState(habit?.frequency || 'daily');
   const [selectedIcon, setSelectedIcon] = useState(habit?.icon || '💪');
   const [selectedColor, setSelectedColor] = useState(habit?.color || '#3b82f6');
-  const [weeklyTarget, ] = useState(habit?.weekly_target || 1);
+  const [weeklyTarget, setWeeklyTarget] = useState(habit?.weekly_target || 1);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -110,6 +110,32 @@ export default function HabitForm({ habit, onSave, onCancel }) {
               </button>
             </div>
           </div>
+
+          {/* Weekly target */}
+          {frequency === 'weekly' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Objectif hebdomadaire *
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={7}
+                value={weeklyTarget}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (Number.isNaN(value)) return;
+                  setWeeklyTarget(Math.max(1, Math.min(7, value)));
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                placeholder="Ex: 3"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Nombre de fois à réaliser l’habitude sur une semaine (1 à 7).
+              </p>
+            </div>
+          )}
 
           {/* Icon Selection */}
           <div>

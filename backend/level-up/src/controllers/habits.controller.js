@@ -6,8 +6,16 @@ exports.create = async (req, res) => {
 }
 
 exports.list = async (req, res) => {
-  const habits = await habitService.getHabits(req.user.id)
+  const includeArchived = req.query.includeArchived === 'true'
+  const habits = includeArchived 
+    ? await habitService.getAllHabits(req.user.id)
+    : await habitService.getHabits(req.user.id)
   res.json(habits)
+}
+
+exports.delete = async (req, res) => {
+  await habitService.deleteHabit(req.params.id)
+  res.status(204).send()
 }
 
 exports.update = async (req, res) => {
